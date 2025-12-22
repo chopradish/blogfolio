@@ -50,7 +50,7 @@ An MDP is a 4-tuple, $\mathcal{M} = (\mathcal{S}, \mathcal{A}, \mathcal{R}, P) $
 
 ## How Good Actually is a State or an Action
 
-For the agent to be able to learn, it might need to evaluate how good a state is to be there, or how good aan action is to take. To tackle this we introduce three new quantities: Return $G_t$, State-Value Function $v(s)$ and the Action-Value function $q(s, a)$.
+For the agent to be able to learn, it might need to evaluate how good a state is to be there, or how good an action is to take. To tackle this we introduce three new quantities: Return $G_t$, State-Value Function $v(s)$ and the Action-Value function $q(s, a)$.
 
 **Return** is simply the total value of the reward going forward from the current timestep.
 
@@ -58,7 +58,7 @@ $$
 G_t = R_{t + 1} + R_{t + 2} + ... = \sum_{k=0}^{\infty} R_{t+k+1}
 $$
 
-However, if an episode never ends (for example in the case of balancing a pole on a moving cart, or our supply chain management problem even), $G_t$ might blow up to positive or negative Infinities. Further, we might wanna weight rewards that we might get say 3 steps down the line more than those we get 100 steps down the line. To solve all these problems, we introduce a discounting factor $\gamma$ when calculating the Return.
+However, if an episode never ends (for example in the case of balancing a pole on a moving cart, or our supply chain management problem even), $G_t$ might blow up to positive or negative Infinities. Further, we might want to weight rewards that we might get say 3 steps down the line more than those we get 100 steps down the line. To solve all these problems, we introduce a discounting factor $\gamma$ when calculating the Return.
 
 $$
 G_t = R_{t + 1} + \gamma R_{t + 2} + \gamma^2 R_{t + 3} ... = \sum_{k=0}^{\infty} \gamma^k R_{t+k+1}
@@ -224,7 +224,7 @@ Temporal Difference Learning is used to update targets, or our estimates of stat
 
 This accomplished by updating targets with our estimates themselves. This is known as **bootstrapping**.
 
-TD Learning can be used to either just estimate the state (or action) value functions based on a certain policy, or it can be used to simultaneously learn an optimal policy as well. The former is knows an _Value Estimation_ and the latter _Control_.
+TD Learning can be used to either just estimate the state (or action) value functions based on a certain policy, or it can be used to simultaneously learn an optimal policy as well. The former is known as _Value Estimation_ and the latter _Control_.
 
 ### Value Estimation
 

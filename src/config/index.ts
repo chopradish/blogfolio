@@ -76,7 +76,7 @@ export const careerEvents: CareerEvent[] = [
     position: "Visiting Scholar, Research Fellow under Dr. Adish Singla",
     org: "Max Planck Institute for Software Systems",
     details: [
-      "Replicated results from paper (arxiv:2207.14722), optimising implementation to compute higher order gradients.",
+      "Replicated results from paper (arxiv:2207.14722), optimizing implementation to compute higher order gradients.",
       "Iterated and improved training times from 72hrs+ to 3hrs.",
     ],
   },
@@ -98,7 +98,7 @@ export const careerEvents: CareerEvent[] = [
     position: "SWE (I & II)",
     org: "D.E. Shaw",
     details: [
-      "Built a pipeline & dashboard, to track & analyse, internal compute & storage cluster's usage metrics.",
+      "Built a pipeline & dashboard, to track & analyze, internal compute & storage cluster's usage metrics.",
       "Pioneered effort to evaluate, benchmark and setup an internal data warehouse (ClickHouse).",
       "Deployed internship work.",
     ],
@@ -110,7 +110,7 @@ export const careerEvents: CareerEvent[] = [
     position: "Member",
     org: "CMU Database Group",
     details: [
-      "Working on cardinality and cost-estimation for query optimizer (optd).",
+      "Working on cardinality and cost-estimation for an experimental query optimizer.",
     ],
   },
 ];
@@ -118,15 +118,15 @@ export const careerEvents: CareerEvent[] = [
 export const featuredProjects: Project[] = [
   {
     id: 1,
-    title: "Databse System Potpourri",
-    desc: "Highly parallel buffer pool manager, B+ tree index, query executor and heuristic-optimiser for a toy database system.",
+    title: "Database System Potpourri",
+    desc: "Highly parallel buffer pool manager, B+ tree index, query executor and heuristic-optimizer for a toy database system.",
     stack: ["C++", "CMake", "GTest"],
     link: "https://15445.courses.cs.cmu.edu/fall2025/assignments.html",
   },
   {
     id: 2,
     title: "Operator Fusion in Deep Learning Framework",
-    desc: "Implement and benchmark graph-fusion and an optimized fused kernel of GEMM-Add-Activation nodes.",
+    desc: "Implement, optimize and benchmark graph-compilation and kernel for fused GEMM-Add-Activation",
     stack: ["C++", "Python", "CUDA", "NSight"],
     link: "https://dlsyscourse.org/project/",
   },

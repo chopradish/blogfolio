@@ -33,12 +33,12 @@ export const MainNav = ({
 
         {items?.length ? (
           <nav className="hidden gap-4 sm:flex">
-            {items?.map((item, index) => (
+            {items?.map((item) => (
               <a
-                key={index}
+                key={item.title}
                 href={item.disabled ? "#" : item.href}
                 className={cn(
-                  "flex items-center text-lg font-medium transition-color sm:text-sm",
+                  "flex items-center text-lg font-medium transition-colors sm:text-sm",
                   item.disabled
                     ? "text-gray-400"
                     : "text-gray-600 hover:text-gray-950 dark:text-gray-300 dark:hover:text-white",
