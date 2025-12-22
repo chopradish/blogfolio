@@ -1,0 +1,52 @@
+---
+import { Image } from "astro:assets";
+import MugshotImage from "../assets/mugshot.jpg";
+import { Projects } from "../components/Projects";
+import { Timeline } from "../components/Timeline";
+import { careerEvents, featuredProjects } from "../config";
+import MainLayout from "../layouts/MainLayout.astro";
+
+const title = "Aditya Chopra • chopradish";
+---
+
+<MainLayout title={title}>
+  <main
+    class="container flex flex-col gap-y-12 space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32"
+  >
+    <section
+      id="hero"
+      class="flex flex-col-reverse justify-between gap-5 sm:flex-row sm:items-center"
+    >
+      <div class="rows-span-1 col-span-1 col-start-1 max-w-md sm:col-span-4">
+        <h1 class="text-5xl font-bold">Aditya Chopra</h1>
+        <h5 class="mt-2 text-xl text-rose-500 dark:text-rose-400">
+          CS Grad Student @ CMU | prev @ D.E. Shaw, Nutanix
+        </h5>
+
+        <div class="text-gray-700 dark:text-gray-200 mt-8">
+          Pursuing a career in design, databases and distributed systems ✨
+        </div>
+      </div>
+      <div class="relative col-span-1 row-span-1 block sm:col-end-4">
+        <Image
+          alt="profile picture"
+          src={MugshotImage}
+          width="150"
+          height="150"
+          class="rounded-full"
+          quality="max"
+        />
+      </div>
+    </section>
+
+    <section id="timeline">
+      <h3 class="text-3xl font-semibold mb-4">What am I up to?</h3>
+      <Timeline careerEvents={careerEvents} client:load />
+    </section>
+
+    <section id="featuerd-projects">
+      <h3 class="text-3xl font-semibold mb-4">Featured Projects</h3>
+      <Projects featuredProjects={featuredProjects} client:load />
+    </section>
+  </main>
+</MainLayout>

@@ -1,0 +1,44 @@
+type NavItem = {
+  title: string;
+  href: string;
+  disabled?: boolean;
+};
+
+export type MainNavItem = NavItem;
+
+export type SocialNavItem = NavItem & {
+  icon: string;
+};
+
+export type NavConfig = {
+  mainNav: MainNavItem[];
+  socialNav: SocialNavItem[];
+};
+
+export type Project = {
+  id: number;
+  title: string;
+  desc: string;
+  stack: string[];
+  link: string;
+  ext?: string;
+};
+
+export type CareerEvent = {
+  id: number;
+  time: string;
+  loc: string;
+  position: string;
+  org: string;
+  details: string[];
+};
+
+export type SiteConfig = {
+  name: string;
+  description: string;
+  url: string;
+  links: {
+    twitter: string;
+    repository: string;
+  };
+};

@@ -1,0 +1,62 @@
+---
+import BaseHead from "../components/BaseHead.astro";
+import { SiteFooter } from "../components/Footer";
+import { MainNav } from "../components/MainNav";
+import { mainNav, siteConfig } from "../config";
+import "../styles/globals.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = siteConfig.name, description = siteConfig.description } =
+  Astro.props;
+const currentPath = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title={title} description={description} />
+    <slot name="head" />
+    <script is:inline>
+      // Theme initialization script - runs before page render to prevent flash
+      const getTheme = () => {
+        // Check localStorage first
+        const stored = localStorage.getItem("theme");
+        if (stored) return stored;
+
+        // Fall back to system preference
+        return window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+      };
+
+      const theme = getTheme();
+      if (theme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+
+      // Optional: Save the initial theme to localStorage if not set
+      if (!localStorage.getItem("theme")) {
+        localStorage.setItem("theme", theme);
+      }
+    </script>
+  </head>
+  <body class="min-h-screen bg-white dark:bg-gray-950 text-black dark:text-white antialiased">
+    <div class="flex min-h-screen flex-col">
+      <header class="container z-40 bg-background">
+        <div class="flex h-20 items-center align-middle justify-between py-6">
+          <MainNav items={mainNav} currentPath={currentPath} client:load />
+        </div>
+      </header>
+      <main class="flex-1">
+        <slot />
+      </main>
+      <SiteFooter currentPath={currentPath} client:load />
+    </div>
+  </body>
+</html>
