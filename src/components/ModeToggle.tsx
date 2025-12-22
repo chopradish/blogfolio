@@ -3,17 +3,22 @@
 import { useEffect, useState } from "react";
 import { Icons } from "./Icons";
 
+const DEFAULT_THEME = "light";
+
 export function ModeToggle() {
-  const [theme, setTheme] = useState<string>("dark");
+  const [theme, setTheme] = useState<string>(DEFAULT_THEME);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") || "light";
-    setTheme(savedTheme);
-    // Ensure the class is applied on mount
-    if (savedTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+      setTheme(savedTheme);
+      
+      // Ensure the class is applied on mount
+      if (savedTheme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
     }
   }, []);
 
