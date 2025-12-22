@@ -24,9 +24,9 @@ export const SiteFooter = ({
     >
       {/* Nav */}
       <nav className="col-span-1 flex flex-col items-center gap-y-2 md:items-start">
-        {mainNav.map((item, index) => (
+        {mainNav.map((item) => (
           <a
-            key={index}
+            key={item.title}
             href={item.disabled ? "#" : item.href}
             className={cn(
               "flex items-center text-lg font-medium transition-colors hover:text-foreground/80",
