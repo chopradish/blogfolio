@@ -70,7 +70,7 @@ export const SiteFooter = ({
           </a>{" "}
           &bull; Hosted on{" "}
           <a
-            href="https://vercel.com"
+            href="https://pages.cloudflare.com"
             target="_blank"
             rel="noreferrer"
             className="font-medium underline underline-offset-4"
