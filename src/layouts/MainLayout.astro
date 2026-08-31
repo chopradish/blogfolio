@@ -2,7 +2,7 @@
 import BaseHead from "../components/BaseHead.astro";
 import { SiteFooter } from "../components/Footer";
 import { MainNav } from "../components/MainNav";
-import { mainNav, siteConfig } from "../config";
+import personal from "../content/personal.json";
 import "../styles/globals.css";
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
   description?: string;
 }
 
-const { title = siteConfig.name, description = siteConfig.description } =
+const { title = personal.site.name, description = personal.site.description } =
   Astro.props;
 const currentPath = Astro.url.pathname;
 ---
@@ -50,7 +50,7 @@ const currentPath = Astro.url.pathname;
     <div class="flex min-h-screen flex-col">
       <header class="container z-40 bg-background">
         <div class="flex h-20 items-center align-middle justify-between py-6">
-          <MainNav items={mainNav} currentPath={currentPath} client:load />
+          <MainNav items={personal.navigation.main} client:load />
         </div>
       </header>
       <main class="flex-1">

@@ -1,6 +1,6 @@
 "use client";
 
-import { mainNav, siteConfig, socialNav } from "../config";
+import personal from "../content/personal.json";
 import { cn } from "../lib/utils";
 import { Icons } from "./Icons";
 
@@ -24,7 +24,7 @@ export const SiteFooter = ({
     >
       {/* Nav */}
       <nav className="col-span-1 flex flex-col items-center gap-y-2 md:items-start">
-        {mainNav.map((item) => (
+        {personal.navigation.main.map((item) => (
           <a
             key={item.title}
             href={item.disabled ? "#" : item.href}
@@ -42,8 +42,8 @@ export const SiteFooter = ({
       </nav>
       {/* Socials */}
       <div className="col-span-1 flex justify-center gap-x-4 md:items-start">
-        {socialNav.map((value) => {
-          const IconComponent = Icons[value.icon];
+        {personal.navigation.social.map((value) => {
+          const IconComponent = Icons[value.icon as keyof typeof Icons];
           return (
             <a
               key={value.href}
@@ -61,7 +61,7 @@ export const SiteFooter = ({
         <p className="text-center text-sm leading-loose md:text-left">
           Built by{" "}
           <a
-            href={siteConfig.links.twitter}
+            href={personal.site.links.twitter}
             target="_blank"
             rel="noreferrer"
             className="font-medium underline underline-offset-4"
@@ -79,7 +79,7 @@ export const SiteFooter = ({
           </a>{" "}
           &bull; Source Code on{" "}
           <a
-            href={siteConfig.links.repository}
+            href={personal.site.links.repository}
             target="_blank"
             rel="noreferrer"
             className="font-medium underline underline-offset-4"

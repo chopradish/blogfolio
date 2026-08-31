@@ -1,13 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import { siteConfig } from "../config";
 import { cn } from "../lib/utils";
-import type { MainNavItem } from "../types";
-import { Icons } from "./Icons";
+import type { MainNavItem, MappableItems } from "../types";
 
 type MobileNavProps = {
-  items: MainNavItem[];
+  items: MappableItems<MainNavItem>;
   children?: React.ReactNode;
   onClose: () => void;
 };
@@ -15,9 +13,12 @@ type MobileNavProps = {
 export const MobileNav = ({ items, children, onClose }: MobileNavProps) => {
   // Lock body scroll when mobile menu is open
   useEffect(() => {
-    document.body.style.overflow = "hidden";
+    const browser = globalThis as {
+      document: { body: { style: { overflow: string } } };
+    };
+    browser.document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "unset";
+      browser.document.body.style.overflow = "unset";
     };
   }, []);
 
@@ -32,17 +33,19 @@ export const MobileNav = ({ items, children, onClose }: MobileNavProps) => {
           <a
             href={"/"}
             className="flex w-full items-center rounded-md p-2 text-sm font-medium hover:underline"
+            onClick={onClose}
           >
             Home
           </a>
-          {items.map((item, index) => (
+          {items.map((item) => (
             <a
-              key={index}
+              key={item.title}
               href={item.disabled ? "#" : item.href}
               className={cn(
                 "flex w-full items-center rounded-md p-2 text-sm font-medium hover:underline",
                 item.disabled && "cursor-not-allowed opacity-60",
               )}
+              onClick={onClose}
             >
               {item.title}
             </a>

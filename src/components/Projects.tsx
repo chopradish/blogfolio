@@ -23,9 +23,13 @@ const ProjectCard = ({ projectDeets }: ProjectCardProps) => {
 
 type ProjectsProps = {
   featuredProjects: Project[];
+  allProjectsUrl: string;
 };
 
-export const Projects = ({ featuredProjects }: ProjectsProps) => {
+export const Projects = ({
+  featuredProjects,
+  allProjectsUrl,
+}: ProjectsProps) => {
   return (
     <div className="flex flex-col gap-y-4">
       <div className="grid grid-cols-2 md:grid-cols-3 items-stretch gap-5">
@@ -34,7 +38,7 @@ export const Projects = ({ featuredProjects }: ProjectsProps) => {
         ))}
       </div>
       <a
-        href="https://github.com/chopradish/"
+        href={allProjectsUrl}
         className="text-primary-200 hover:text-primary-100 flex items-center gap-x-1 transition-colors"
       >
         View all Projects

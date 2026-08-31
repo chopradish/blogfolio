@@ -44,8 +44,8 @@ Accessibility is a feature, not a later polish pass. For every UI change:
 - This is an Astro 5 static site, deployed to Cloudflare Pages. Use Astro by default.
 - Use React only for genuinely interactive, client-side behavior. Avoid hydration for static presentation; every `client:*` directive must have a user-facing justification.
 - Prefer server/static rendering, native browser capabilities, and CSS before client JavaScript.
-- Blog content lives in `src/content/blog/` as Markdown/MDX, with its schema in `src/content.config.ts`. Do not modify post prose or frontmatter without explicit authorization.
-- Shared site metadata/navigation and portfolio data live in `src/config/index.ts`; treat changes to public links, career history, and project copy as editorial changes requiring approval.
+- All site data lives in `src/content/`. Personal information, navigation, career history, and featured projects are in `src/content/personal.json`; blog posts are Markdown/MDX files in `src/content/blog/`. The blog collection schema remains in `src/content.config.ts`.
+- Treat changes to public links, career history, project copy, post prose, and post frontmatter as editorial changes requiring explicit approval.
 - Global styles live in `src/styles/globals.css`. Follow existing Tailwind v4 conventions and use the configured theme rather than introducing ad-hoc global styling.
 - Math rendering uses `remark-math` and `rehype-katex`; preserve it when changing blog presentation.
 - Use TypeScript and keep component boundaries small and purposeful. Prefer an accessible native HTML control over an icon-only custom control.

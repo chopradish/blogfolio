@@ -2,7 +2,7 @@
 import { Image } from "astro:assets";
 import { getCollection } from "astro:content";
 import FormattedDate from "../../components/FormattedDate.astro";
-import { SITE_DESCRIPTION, SITE_TITLE } from "../../consts";
+import personal from "../../content/personal.json";
 import MainLayout from "../../layouts/MainLayout.astro";
 
 const posts = (await getCollection("blog")).sort(
@@ -10,7 +10,10 @@ const posts = (await getCollection("blog")).sort(
 );
 ---
 
-<MainLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+<MainLayout
+  title={personal.site.name}
+  description={personal.site.description}
+>
 	<main class="container flex flex-col gap-y-8 pb-8 pt-6 md:pb-12 md:pt-10">
 		<section>
 			<h1 class="mb-8 text-4xl font-bold">Blog</h1>

@@ -6,6 +6,11 @@ type NavItem = {
 
 export type MainNavItem = NavItem;
 
+export type MappableItems<T> = {
+  readonly length: number;
+  map<U>(callback: (item: T, index: number) => U): U[];
+};
+
 export type SocialNavItem = NavItem & {
   icon: string;
 };

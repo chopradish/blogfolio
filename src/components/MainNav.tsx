@@ -1,25 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { siteConfig } from "../config";
+import personal from "../content/personal.json";
 import { cn } from "../lib/utils";
-import type { MainNavItem } from "../types";
+import type { MainNavItem, MappableItems } from "../types";
 import { Icons } from "./Icons";
 import { MobileNav } from "./MobileNav";
 import { ModeToggle } from "./ModeToggle";
 
 type MainNavProps = {
-  items?: MainNavItem[];
+  items?: MappableItems<MainNavItem>;
   children?: React.ReactNode;
-  currentPath?: string;
 };
 
-export const MainNav = ({
-  items,
-  children,
-  currentPath = "",
-}: MainNavProps) => {
-  const [showMobileMenu, setShowMobileMenu] = useState<boolean>(false);
+export const MainNav = ({ items, children }: MainNavProps) => {
+  const mobileMenuState = useState<boolean>(false);
+  const showMobileMenu = mobileMenuState[0];
+  const setShowMobileMenu = mobileMenuState[1];
 
   return (
     <div className="w-full flex justify-between">
@@ -27,7 +24,7 @@ export const MainNav = ({
         <a href="/" className="hidden items-center space-x-2 sm:flex">
           <Icons.logo />
           <span className="hidden font-bold sm:inline-block">
-            {siteConfig.name}
+            {personal.site.name}
           </span>
         </a>
 
@@ -52,11 +49,12 @@ export const MainNav = ({
         ) : null}
       </div>
       <button
+        type="button"
         className="flex items-center space-x-2 sm:hidden"
         onClick={() => setShowMobileMenu(!showMobileMenu)}
       >
         {showMobileMenu ? <Icons.close /> : <Icons.logo />}
-        <span className="font-bold">{siteConfig.name}</span>
+        <span className="font-bold">{personal.site.name}</span>
       </button>
       {showMobileMenu && items && (
         <MobileNav items={items} onClose={() => setShowMobileMenu(false)}>
