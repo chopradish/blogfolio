@@ -4,7 +4,9 @@ import type { CollectionEntry } from "astro:content";
 import type { MarkdownHeading } from "astro";
 import BlogToc from "../components/BlogToc.astro";
 import FormattedDate from "../components/FormattedDate.astro";
+import { getContainedImageAspectRatio } from "../lib/images";
 import MainLayout from "./MainLayout.astro";
+import "katex/dist/katex.min.css";
 
 type Props = CollectionEntry<"blog">["data"] & {
   headings?: MarkdownHeading[];
@@ -22,8 +24,6 @@ const sections = headings.filter((heading) => heading.depth === 2);
 ---
 
 <MainLayout title={title} description={description}>
-	<link slot="head" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.0/dist/katex.min.css">
-
 	<div class="blog-shell">
 		{sections.length > 0 && (
 			<aside class="blog-sidebar">
@@ -40,6 +40,8 @@ const sections = headings.filter((heading) => heading.depth === 2);
 						width={1020}
 						height={510}
 						src={heroImage}
+						fit="contain"
+						style={{ aspectRatio: getContainedImageAspectRatio(heroImage, 1020, 510) }}
 						alt=""
 						class="rounded-lg"
 					/>

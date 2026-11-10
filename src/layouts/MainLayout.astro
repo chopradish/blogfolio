@@ -1,7 +1,7 @@
 ---
 import BaseHead from "../components/BaseHead.astro";
-import { SiteFooter } from "../components/Footer";
-import { MainNav } from "../components/MainNav";
+import SiteFooter from "../components/SiteFooter.astro";
+import SiteNav from "../components/SiteNav.astro";
 import personal from "../content/personal.json";
 import "../styles/globals.css";
 
@@ -24,8 +24,12 @@ const currentPath = Astro.url.pathname;
       // Theme initialization script - runs before page render to prevent flash
       const getTheme = () => {
         // Check localStorage first
-        const stored = localStorage.getItem("theme");
-        if (stored) return stored;
+        try {
+          const stored = localStorage.getItem("theme");
+          if (stored === "light" || stored === "dark") return stored;
+        } catch {
+          // Fall back to the system theme if storage is blocked.
+        }
 
         // Fall back to system preference
         return window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -41,8 +45,10 @@ const currentPath = Astro.url.pathname;
       }
 
       // Optional: Save the initial theme to localStorage if not set
-      if (!localStorage.getItem("theme")) {
-        localStorage.setItem("theme", theme);
+      try {
+        if (!localStorage.getItem("theme")) localStorage.setItem("theme", theme);
+      } catch {
+        // Theme switching does not require persistent storage.
       }
     </script>
   </head>
@@ -50,13 +56,13 @@ const currentPath = Astro.url.pathname;
     <div class="flex min-h-screen flex-col">
       <header class="container z-40 bg-background">
         <div class="flex h-20 items-center align-middle justify-between py-6">
-          <MainNav items={personal.navigation.main} client:load />
+          <SiteNav items={personal.navigation.main} />
         </div>
       </header>
       <main class="flex-1">
         <slot />
       </main>
-      <SiteFooter currentPath={currentPath} client:load />
+      <SiteFooter currentPath={currentPath} />
     </div>
   </body>
 </html>

@@ -3,6 +3,9 @@ allowBuilds:
   sharp: true
   workerd: true
 
+minimumReleaseAgeExclude:
+  - '@lucide/astro@1.71.0'
+
 onlyBuiltDependencies:
   - esbuild
   - sharp

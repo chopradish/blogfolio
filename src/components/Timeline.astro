@@ -13,14 +13,15 @@ const events = await Promise.all(
 );
 ---
 
-<ol class="flex flex-col list-none">
+<ol class="career-timeline flex flex-col list-none">
   {events.map(({ id, event, Content }, index) => (
-    <li>
-      <article class="grid grid-cols-1 gap-x-8 sm:grid-cols-6" aria-labelledby={`career-${id}`}>
-        <div class:list={[
-          "flex flex-col p-5 sm:col-span-2",
-          index % 2 === 0 && "border-l rounded-l border-y",
-        ]}>
+    <li class="timeline-item">
+      <article
+        class="timeline-entry grid grid-cols-1 sm:grid-cols-6"
+        data-side={index % 2 === 0 ? "left" : "right"}
+        aria-labelledby={`career-${id}`}
+      >
+        <div class="flex flex-col p-5 sm:col-span-2">
           <h3 id={`career-${id}`} class="font-semibold text-rose-500 dark:text-rose-400">
             {event.org}
           </h3>
@@ -28,11 +29,7 @@ const events = await Promise.all(
           <p class="text-gray-600 dark:text-gray-300 text-xs">{event.time}</p>
           <p class="text-gray-600 dark:text-gray-300 text-xs">{event.loc}</p>
         </div>
-        <div class:list={[
-          "timeline-description block p-5 content-center sm:col-span-4",
-          index % 2 !== 0 && "border-r rounded-r border-y",
-          index === 0 && "border-t",
-        ]}>
+        <div class="timeline-description block p-5 content-center sm:col-span-4">
           <Content />
         </div>
       </article>

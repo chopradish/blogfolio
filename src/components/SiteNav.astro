@@ -1,0 +1,116 @@
+---
+import personal from "../content/personal.json";
+import type { MainNavItem } from "../types";
+import Icon from "./Icon.astro";
+import ThemeToggle from "./ThemeToggle.astro";
+
+interface Props {
+  items?: MainNavItem[];
+}
+
+const { items = [] } = Astro.props;
+---
+
+<div class="w-full flex items-center justify-between">
+  <div class="hidden sm:flex gap-8">
+    <a href="/" class="hidden items-center space-x-2 sm:flex">
+      <Icon name="logo" />
+      <span class="hidden font-bold sm:inline-block">{personal.site.name}</span>
+    </a>
+    {items.length > 0 && (
+      <nav class="hidden gap-4 sm:flex">
+        {items.map((item) => (
+          <a
+            href={item.disabled ? "#" : item.href}
+            class:list={[
+              "flex items-center text-lg font-medium transition-colors sm:text-sm",
+              item.disabled ? "text-gray-400" : "text-gray-600 hover:text-gray-950 dark:text-gray-300 dark:hover:text-white",
+              item.disabled && "cursor-not-allowed opacity-80",
+            ]}
+          >
+            {item.title}
+          </a>
+        ))}
+      </nav>
+    )}
+  </div>
+  <details id="mobile-navigation" class="group sm:hidden">
+    <summary
+      class="flex min-h-11 cursor-pointer list-none items-center space-x-2 [&::-webkit-details-marker]:hidden focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-rose-700 dark:focus-visible:outline-rose-300"
+      aria-label="Toggle navigation"
+    >
+      <Icon name="logo" class="group-open:hidden" />
+      <Icon name="close" class="hidden group-open:block" />
+      <span class="font-bold">{personal.site.name}</span>
+    </summary>
+    <div class="fixed inset-x-0 bottom-0 top-20 z-50 grid grid-flow-row auto-rows-max overflow-auto pb-24 bg-white dark:bg-gray-950 p-4 text-gray-900 dark:text-gray-100 shadow-sm">
+      <div class="relative z-20 grid gap-6 rounded-md">
+        <nav class="grid grid-flow-row auto-rows-max text-sm">
+          <a href="/" class="flex w-full items-center rounded-md p-2 text-sm font-medium hover:underline">Home</a>
+          {items.map((item) => (
+            <a
+              href={item.disabled ? "#" : item.href}
+              class:list={[
+                "flex w-full items-center rounded-md p-2 text-sm font-medium hover:underline",
+                item.disabled && "cursor-not-allowed opacity-60",
+              ]}
+            >
+              {item.title}
+            </a>
+          ))}
+        </nav>
+      </div>
+    </div>
+  </details>
+  <ThemeToggle />
+</div>
+
+<script>
+  const menu = document.querySelector<HTMLDetailsElement>("#mobile-navigation");
+  const summary = menu?.querySelector("summary");
+  const desktop = window.matchMedia("(min-width: 40rem)");
+  let previousOverflow: string | undefined;
+  const background = new Map<HTMLElement, boolean>();
+
+  function syncMenu() {
+    if (!menu) return;
+    if (desktop.matches && menu.open) {
+      menu.open = false;
+      if (menu.contains(document.activeElement)) {
+        menu.parentElement?.querySelector<HTMLAnchorElement>('a[href="/"]')?.focus();
+      }
+    }
+
+    if (menu.open && previousOverflow === undefined) {
+      previousOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      for (const element of document.querySelectorAll<HTMLElement>("main, footer")) {
+        background.set(element, element.inert);
+        element.inert = true;
+      }
+    } else if (!menu.open && previousOverflow !== undefined) {
+      document.body.style.overflow = previousOverflow;
+      previousOverflow = undefined;
+      for (const [element, inert] of background) element.inert = inert;
+      background.clear();
+    }
+  }
+
+  menu?.addEventListener("toggle", syncMenu);
+  desktop.addEventListener("change", syncMenu);
+  menu?.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => {
+      if (menu) menu.open = false;
+      syncMenu();
+    });
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && menu?.open) {
+      event.preventDefault();
+      menu.open = false;
+      syncMenu();
+      summary?.focus();
+    }
+  });
+  syncMenu();
+</script>

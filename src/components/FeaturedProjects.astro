@@ -1,0 +1,31 @@
+---
+import type { Project } from "../types";
+import Icon from "./Icon.astro";
+
+interface Props {
+  featuredProjects: Project[];
+  allProjectsUrl: string;
+}
+
+const { featuredProjects, allProjectsUrl } = Astro.props;
+---
+
+<div class="flex flex-col gap-y-4">
+  <div class="grid grid-cols-2 md:grid-cols-3 items-stretch gap-5">
+    {featuredProjects.map((project) => (
+      <div class="col-span-1">
+        <a
+          href={project.link}
+          class="flex h-full origin-center flex-col justify-between gap-8 rounded-lg outline outline-gray-500 hover:outline-gray-900 dark:outline-gray-400 dark:hover:outline-gray-100 p-4 transition-transform"
+        >
+          <div class="text-sm">{project.desc}</div>
+          <span class="font-semibold text-rose-500 dark:text-rose-400 md:text-2xl">{project.title}</span>
+        </a>
+      </div>
+    ))}
+  </div>
+  <a href={allProjectsUrl} class="text-primary-200 hover:text-primary-100 flex items-center gap-x-1 transition-colors">
+    View all Projects{" "}
+    <span><Icon name="arrowRight" class="h-4 w-4" /></span>
+  </a>
+</div>
