@@ -1,0 +1,12 @@
+---
+import Timeline from "../components/Timeline.astro";
+import personal from "../content/personal.json";
+import MainLayout from "../layouts/MainLayout.astro";
+---
+
+<MainLayout title={`Resume • ${personal.site.name}`}>
+  <div class="container pb-12 pt-6 md:pt-10">
+    <h1 class="mb-8 text-4xl font-bold">Resume</h1>
+    <Timeline />
+  </div>
+</MainLayout>

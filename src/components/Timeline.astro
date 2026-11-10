@@ -1,6 +1,12 @@
 ---
 import { getCollection, render } from "astro:content";
+import { careerCategories } from "../lib/career";
 
+interface Props {
+  filterable?: boolean;
+}
+
+const { filterable = false } = Astro.props;
 const entries = await getCollection("career");
 const events = await Promise.all(
   entries
@@ -13,9 +19,34 @@ const events = await Promise.all(
 );
 ---
 
-<ol class="career-timeline flex flex-col list-none">
+<div class="career-layout" data-career-timeline>
+  {filterable && (
+    <fieldset class="career-filters mb-6" hidden>
+      <legend class="sr-only">Filter career experiences</legend>
+      <div class="career-filter-options flex flex-wrap gap-2">
+        {["featured", ...careerCategories].map((filter) => (
+          <button
+            type="button"
+            class="career-filter"
+            data-filter={filter}
+            aria-pressed={filter === "featured" ? "true" : "false"}
+            aria-controls="home-career-items"
+          >
+            {filter === "featured" ? "Featured" : filter}
+          </button>
+        ))}
+      </div>
+      <p class="sr-only" role="status" data-career-status></p>
+    </fieldset>
+  )}
+<ol id={filterable ? "home-career-items" : undefined} class="career-timeline flex flex-col list-none">
   {events.map(({ id, event, Content }, index) => (
-    <li class="timeline-item">
+    <li
+      class="timeline-item"
+      data-tags={event.tags.join(" ")}
+      data-first={index === 0 ? "" : undefined}
+      data-last={index === events.length - 1 ? "" : undefined}
+    >
       <article
         class="timeline-entry grid grid-cols-1 sm:grid-cols-6"
         data-side={index % 2 === 0 ? "left" : "right"}
@@ -28,6 +59,11 @@ const events = await Promise.all(
           <p class="text-sm">{event.position}</p>
           <p class="text-gray-600 dark:text-gray-300 text-xs">{event.time}</p>
           <p class="text-gray-600 dark:text-gray-300 text-xs">{event.loc}</p>
+          <ul class="mt-3 flex flex-wrap gap-2 text-xs text-gray-600 dark:text-gray-300" aria-label="Categories">
+            {event.tags.filter((tag) => tag !== "featured").map((tag) => (
+              <li class="border border-zinc-300 dark:border-zinc-700 px-2 py-1">{tag}</li>
+            ))}
+          </ul>
         </div>
         <div class="timeline-description block p-5 content-center sm:col-span-4">
           <Content />
@@ -36,3 +72,44 @@ const events = await Promise.all(
     </li>
   ))}
 </ol>
+</div>
+
+<script>
+  import { matchesCareerFilter, toggleCareerFilter, type CareerFilter } from "../lib/career";
+
+  for (const timeline of document.querySelectorAll<HTMLElement>("[data-career-timeline]")) {
+    const filters = timeline.querySelector<HTMLFieldSetElement>(".career-filters");
+    if (!filters) continue;
+    const buttons = [...filters.querySelectorAll<HTMLButtonElement>("[data-filter]")];
+    const items = [...timeline.querySelectorAll<HTMLElement>(".timeline-item")];
+    const status = filters.querySelector<HTMLElement>("[data-career-status]");
+    let selected: CareerFilter[] = ["featured"];
+
+    function update() {
+      for (const button of buttons) {
+        button.setAttribute("aria-pressed", String(selected.includes(button.dataset.filter as CareerFilter)));
+      }
+      const visible = items.filter((item) => {
+        item.hidden = !matchesCareerFilter(item.dataset.tags?.split(" ") ?? [], selected);
+        item.removeAttribute("data-first");
+        item.removeAttribute("data-last");
+        return !item.hidden;
+      });
+      visible.forEach((item, index) => {
+        item.querySelector(".timeline-entry")?.setAttribute("data-side", index % 2 === 0 ? "left" : "right");
+      });
+      visible[0]?.setAttribute("data-first", "");
+      visible.at(-1)?.setAttribute("data-last", "");
+      if (status) status.textContent = `${visible.length} of ${items.length} experiences shown`;
+    }
+
+    for (const button of buttons) {
+      button.addEventListener("click", () => {
+        selected = toggleCareerFilter(selected, button.dataset.filter as CareerFilter);
+        update();
+      });
+    }
+    update();
+    filters.hidden = false;
+  }
+</script>

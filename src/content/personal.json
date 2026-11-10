@@ -12,7 +12,8 @@
     "name": "Aditya Chopra",
     "headline": "CS @ CMU | prev @ Databricks, D.E. Shaw, Nutanix",
     "intro": "Pursuing a career in database, compilers and distributed storage systems ✨",
-    "image": "/images/mugshot.png",
+    "image": "/lightshot.jpg",
+    "imageDark": "/darkshot.jpg",
     "imageAlt": "profile picture"
   },
   "navigation": {
@@ -24,7 +25,7 @@
       },
       {
         "title": "Resume",
-        "href": "https://drive.google.com/drive/u/1/folders/1zh6luhBh9zG7Y90hM2zhYCkyBdUCq4w1",
+        "href": "/resume",
         "disabled": false
       }
     ],
@@ -47,7 +48,7 @@
     ]
   },
   "home": {
-    "timelineHeading": "What am I up to?",
+    "timelineHeading": "Where did I come from? Where will I go?",
     "projectsHeading": "Featured Projects",
     "allProjectsUrl": "https://github.com/chopradish/"
   },
