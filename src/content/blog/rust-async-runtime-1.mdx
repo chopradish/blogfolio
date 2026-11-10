@@ -1,0 +1,208 @@
+---
+title: 'Multi-core Async Runtime for Rust'
+description: 'A project for the CMU 15-618 Fall 2026 class exploring a high-throughput Rust async runtime with thread-per-core execution, task priorities, selective work stealing, and asynchronous I/O. We plan to evaluate throughput, foreground latency, and memory locality using a minimal disk-backed key-value store and HTTP server.'
+pubDate: '2026-11-09'
+---
+
+import BlogFigure from '../../components/BlogFigure.astro';
+import taskLifecycle from '../../assets/blog/multi-core-async-runtime-for-rust/task-lifecycle.png';
+import computeIoWorkers from '../../assets/blog/multi-core-async-runtime-for-rust/compute-io-workers.png';
+import shardLocalScheduler from '../../assets/blog/multi-core-async-runtime-for-rust/shard-local-scheduler.png';
+import workDiscovery from '../../assets/blog/multi-core-async-runtime-for-rust/work-discovery.png';
+
+## Summary
+
+We aim to build a high throughput async runtime for rust to schedule and execute tasks efficiently on a multi-core system. "Tasks" are Rust `Future` objects. We are especially interested in giving users more flexibility in controlling the scheduling of tasks via constructs like priority and deadlines. We are planning on demonstrating it's performance via a minimal disk-backed kv-store and minimal HTTP server.
+
+## Background
+
+### Core Concepts
+#### Async Programming
+
+The sequential execution model in the Neumann architecture stipulates that 
+
+  1. instructions in a program run in a sequence and 
+  2. an instruction runs only after the former has finished execution. 
+
+The async programming model relaxes the 2nd constraint -- instructions can now start execution before its predecessor finishes. In particular, functions may be designated to be `async`, indicating that they can run in the background while other instructions are executing concurrently in the foreground. This allows programmers to spawn fire-and-forget tasks for various usecases such as background tasks. Async instructions may also be waited on via `await` to ensure that they finish executing before the next instruction runs. This is especially useful to execute multiple blocking IO calls in parallel. 
+
+#### Rust Futures
+
+Rust provides these async constructs via the `Future` trait.  Rust `Future`s are stackless coroutines compiled by the compiler into anonymous state machines. A `Future` is composed of multiple other `Future`s (any `await`ed expressions) and non-future states (such as local variables) and blocking function calls (e.g. syscalls or IO operations). 
+
+`Future`s are progressed by invoking the `poll` method belonging to the `Future` interface. The return value of `poll` represents either a completed execution along with the return value of the asynchronous computation, or some transition of its state machine to a non-terminal state due to waiting for some event outside of its control.
+ 
+#### The Async "Runtime"
+
+An async runtime in Rust is a Rust library that is responsible for *executing* a `Future` by driving to completion the given `Future` and any other `Future`s spawned therefrom by invoking their `poll` methods appropriately. `Future`s may wait for work such as file or network I/O asynchronously, cooperatively yielding to the runtime to allow the execution of other pending `Future`s.
+
+A runtime may execute its `Future`s on a single OS thread, across many OS threads multiplexed over multiple cores, or with a single OS thread pinned to each available core. This is entirely up to the runtime, though some knobs are generally exposed so applications can fine-tune the behavior of a runtime to an extent. To maximally reap the benefits of given application's parallelism, runtimes need to effectively balance work across available cores while minimizing synchroninzation overhead.
+
+<BlogFigure src={taskLifecycle} alt="Task lifecycle from socket readiness through the run queue and polling to waiting or completion.">
+
+**Figure 1. Task scheduling lifecycle.** A wakeup makes a task runnable; workers dequeue and poll it. Pending tasks wait for another wakeup, while completed tasks leave the runtime.
+
+</BlogFigure>
+
+#### IO
+
+The IO subsystem of an async runtime provides important constructs to handle disk and network IO (and timers) that efficiently interface with the runtime to
+perform the requested work *asynchronously*. This also provides the runtime with extra visibility on what cores are waiting and consequently idle, allowing the cooperative scheduling. For instance, using the standard blocking `std::fs` APIs would tie up an OS thread in a corresponding blocking syscall, while a runtime may provide an implementation that defers the work to a dedicated I/O thread that efficiently drives any pending I/O asynchronously.
+
+<BlogFigure src={computeIoWorkers} alt="Two compute workers submit requests to a dedicated I/O driver, which wakes each request's owning worker on completion.">
+
+**Figure 2. Separate compute and I/O workers.** Compute workers submit I/O requests to a dedicated driver. Completions wake the owning compute worker without migrating the waiting future.
+
+</BlogFigure>
+
+### Tokio
+
+[Tokio](https://tokio.rs/) is one of the most popular general-purpose async runtime for rust. It provides core facilities such as I/O, timer, filesystem, synchronization and scheduling. It is also highly efficient, implementing performance optimizations such as co-operative scheduling, multi-threaded work stealing. This allows tokio to have flexible load balancing but at the cost of potentially cross-core synchronization and task migration, undermining cache-locality and adding scheduling overhead. 
+
+## Alternative?
+
+We want to pursue a thread-per-core, shared-(almost-)nothing execution model used by systems such as Seastar and Glmmio. Each core owns a primary task-queue and associated mutable application state. We want to minimize far cross-core migrations (i.e. across NUMA nodes) and are considering a hierachial work-stealing scheduling policy: within-core, within-numa-node, within-machine.  
+
+<BlogFigure src={shardLocalScheduler} alt="Three shard-local workers retain local tasks while worker 1 steals eligible tasks from worker 2; shared atomic counts provide discovery hints.">
+
+**Figure 3. Proposed shard-local, thread-per-core scheduler.** Shard state and local tasks remain on their owning worker; only eligible tasks can be stolen. Shared atomic queue counts are discovery hints, not a substitute for synchronized queue access or a lost-wakeup-safe notification protocol. Counts show the snapshot before stealing.
+
+</BlogFigure>
+
+## The Challenge
+
+Our central challenge is designing a parallel asynchronous runtime that balances throughput, latency, CPU efficiency, and memory locality across heterogeneous workloads. While conventional runtimes provide general-purpose scheduling and I/O abstractions, these abstractions may introduce unnecessary synchronization, scheduling overhead, and cross-core communication for workloads with well-defined ownership and execution requirements.
+
+We aim to investigate how scheduling policies, selective work stealing, and completion-based I/O can be combined to exploit multicore processors and modern NVMe storage efficiently. We will use an LSM-inspired key-value workload to expose the tradeoffs between these mechanisms, with particular emphasis on foreground request latency under concurrent background work.
+
+### Scheduling Policy
+
+We have frequently discussed fairness in parallel scheduling algorithms in class. However, practical systems often execute heterogeneous workloads whose tasks have different latency and throughput requirements. Consequently, treating all runnable tasks equally may not produce the best system-wide performance.
+
+Consider an LSM-based storage engine, where latency-sensitive foreground requests compete with background compaction and maintenance tasks. Foreground operations should generally receive preferential service, while background work can be deferred or cooperatively interrupted under high load. This motivates incorporating task priorities, and potentially deadlines, into our runtime's scheduling interface.
+
+We plan to investigate several scheduling policies, including FIFO, LIFO, and priority-based scheduling. These policies differ in their scheduling overhead, fairness guarantees, and effects on temporal locality. For example, LIFO scheduling may improve cache reuse between closely related tasks, while priority scheduling may reduce foreground tail latency at the expense of additional scheduling overhead or background starvation.
+
+A central question is whether the benefits of more sophisticated scheduling justify their costs. In particular, does maintaining a priority queue, potentially using a heap, provide sufficient performance improvements to offset its additional bookkeeping and memory-access overhead? How do these tradeoffs evolve over long-running, mixed-priority workloads?
+
+### Work Stealing
+
+Thread-per-core execution offers strong locality guarantees by assigning tasks and mutable state to particular workers. However, fixed task ownership can also lead to load imbalance, leaving some cores idle while others have substantial outstanding work.
+
+Consider two worker threads, A and B. Initially, A is executing a task with an otherwise empty ready queue, while B has no runnable work and becomes idle. During execution, A spawns twenty additional tasks. Although B has spare processing capacity, it cannot contribute until it becomes aware of the newly available work and can safely acquire some of it.
+
+<BlogFigure src={workDiscovery} alt="Worker A spawns twenty eligible tasks and notifies idle worker B, which wakes and safely steals ten tasks in an illustrative split.">
+
+**Figure 4. Work discovery after A spawns twenty tasks while B is idle.** This example assumes all twenty tasks are eligible to migrate. The ten-task split is illustrative, not a required stealing policy; count publication and notification must be paired with safe queue access and a lost-wakeup-safe protocol.
+
+</BlogFigure>
+
+This raises two related challenges. First, how should idle workers discover newly available work without excessive polling, synchronization, or cache-coherence traffic? We want to minimize wasted CPU cycles while ensuring that idle workers can respond promptly when work becomes available. Second, which tasks are safe to redistribute?
+
+Rust's `Send` trait indicates that a value can safely be transferred between threads, but `Send` alone does not imply that migration is beneficial. Tasks may depend on shard-local resources or have locality requirements that make migration expensive. Conversely, `!Send` tasks must remain on their owning worker. We therefore intend to explore selective stealing of transferable work while preserving the ownership and locality of shard-bound tasks.
+
+NUMA introduces an additional dimension to this problem. Stealing from a nearby core may be preferable to accessing work and data on a remote NUMA node, but restricting stealing to local workers could leave processing capacity unused. We want to understand how worker selection, task ownership, and NUMA locality influence the tradeoff between load balancing and cross-core communication overhead.
+
+### Misc & Inherent Challenges
+
+Our team has experience with single-threaded Rust and parallel C++, but implementing a concurrent asynchronous runtime in Rust introduces additional challenges.
+
+In particular, task ownership, `Send` and `Sync` constraints, asynchronous lifetimes, and cross-thread wakeups require careful coordination. We must ensure that tasks are not polled concurrently, wakeups are not lost, and resources associated with outstanding I/O operations remain valid until their completion.
+
+The interaction between cooperative scheduling and task priorities introduces further complexity. Since arbitrary Rust futures cannot be preempted during execution, scheduling policies depend on tasks yielding sufficiently frequently to maintain responsiveness.
+
+Finally, accurate performance evaluation will be challenging. Scheduling overhead, cache behavior, storage latency, and device utilization are closely coupled, making it difficult to attribute performance differences to individual design decisions. We will therefore emphasize controlled experiments that isolate specific runtime mechanisms before evaluating their combined effect on the LSM-inspired workload.
+
+## Resources
+
+We will begin from scratch, making use of Rust's documentation of
+[its `Future` interface](https://doc.rust-lang.org/std/future/trait.Future.html)
+as necessary.
+ 
+We would like to use the GHC machines and the PSC machines for measuring and
+understanding the performance of our runtime as it scales to many cores. Having
+access to a NUMA system would open up an interesting avenue to explore since
+tokio is *not* NUMA-aware.
+ 
+[This tokio blog](https://tokio.rs/blog/2019-10-scheduler) has some interesting
+ideas on how to make multi-core schedulers faster. In general, we hope to take
+inspiration from existing runtimes like the ISPC task runtime, the OpenMP
+runtime, the aforementioned tokio runtime, and more.
+ 
+## Goals and Deliverables
+ 
+### What we plan to achieve
+ 
+- Rust async runtime with a performant multi-core scheduler + I/O-driver that is
+  able to support most I/O-bound workloads, providing appropriate I/O
+  primitives.
+ 
+- A small set of workloads that tests various types of compute-bound, I/O-bound, and mixed workloads,
+  ranging from workloads with many small tasks each doing a small amount of I/O
+  such as web servers to workloads that contain long-running tasks doing a large
+  amount of I/O in the background such as LSM storage engines.
+ 
+- Analysis of the performance of web servers implemented on top of regular
+  threads versus our asynchronous runtime to obtain an improved understanding of
+  the trade-off between performance and ergonomics when hand-rolling a
+  thread-based architecture versus opting in to the async/await paradigm.
+ 
+### What we hope to achieve
+ 
+- We would really like to achieve comparable performance on the above mentioned
+  set of workloads compared to state-of-the-art implementations of async
+  runtimes such as `tokio`. To this end, we will spend any additional time we
+  have improving the performance of the runtime as a whole and the scheduler and
+  I/O-driver in particular.
+ 
+## Platform Choice
+ 
+Rust is a systems programming language with a sophisticated type system that
+makes it much easier to safely write high-performance code. Rust's `async/await`
+support exemplifies this. We would thus like to practice the ideas we've learned
+in this class in Rust to become more familiar with these ideas and also to
+become more proficient at expressing them in Rust.
+ 
+## Schedule
+ 
+<div className="blog-table-scroll" role="region" aria-label="Project schedule" tabIndex={0}>
+
+| Dates | Planned Work |
+| --- | --- |
+| 2026-11-10 to 2026-11-16 | Read documentation about Rust `Future`s and how they work.<br />Implement a basic single-threaded Rust async runtime with timer support only. |
+| 2026-11-17 to 2026-11-23 | Read up on `epoll` and how to use it in Rust.<br />Extend the runtime with an I/O driver running on a dedicated thread and I/O primitives for use within `async` functions. |
+| 2026-11-24 to 2026-11-30 | Extend the runtime to run on multiple threads across multiple cores. |
+| 2026-12-01 to 2026-12-07 | Create simple workloads on top of the runtime and thread-based implementations to compare against.<br />Perform analyses. |
+| 2026-12-08 to 2026-12-10 | Prepare the report and, if time permits, optimize the runtime while comparing against `tokio`. |
+
+</div>
+
+## Appendix
+
+### Stretch Goals: 
+
+Conventional approaches to asynchronous disk I/O, particularly blocking operations offloaded to thread pools, may not fully exploit the parallelism of modern NVMe SSDs without incurring significant CPU and scheduling overhead. Modern NVMe SSDs can execute multiple independent I/O requests concurrently by distributing operations across internal flash channels and dies. However, utilizing this parallelism effectively requires maintaining a sufficiently large number of outstanding requests.
+
+Blocking I/O can achieve this concurrency through multiple OS threads, but doing so may introduce additional context switches, scheduling overhead, and synchronization or cache-coherence traffic. We therefore propose to investigate Linux's `io_uring` interface, which supports completion-based asynchronous I/O through shared submission and completion queues.
+
+By batching submissions and processing completions asynchronously, `io_uring` can amortize syscall overhead and enable a small number of pinned executor threads to manage many concurrent storage operations. Its optional submission-queue polling (`SQPOLL`) mode can further eliminate most submission syscalls during steady-state operation, although this comes at the cost of additional polling CPU resources.
+
+Combined with shard-local task execution, this model could allow us to overlap storage latency with useful computation while preserving the locality of task state and I/O metadata. Our goal is to determine whether these benefits outweigh the costs of batching, polling, buffer management, and synchronization.
+
+We also plan to investigate the separation of network and storage I/O, potentially using `epoll` for readiness-based network operations and `io_uring` for completion-based storage operations. Such a design may allow each subsystem to use an interface suited to its workload, but it introduces additional coordination and scheduling complexity.
+
+Two questions are particularly interesting:
+
+**1. What abstractions enable efficient use of `io_uring` without imposing excessive complexity on applications?**
+
+[Jasny et al., *High-Performance DBMSs with io_uring: When and How to Use It*](https://arxiv.org/pdf/2512.04859), demonstrate that naively adopting `io_uring` does not necessarily improve performance. Effective integration requires careful consideration of batching, buffer management, and the surrounding execution architecture.
+
+We want to investigate whether familiar asynchronous I/O APIs can expose these optimizations effectively, or whether exploiting the interface's full performance potential requires different abstractions for buffer ownership, operation submission, and completion handling.
+
+**2. Should computation and I/O completion processing share the same workers?**
+
+A homogeneous worker pool can execute application tasks and process I/O completions on the same threads, potentially improving locality and avoiding cross-core communication. However, expensive computation may delay completion processing and increase latency.
+
+Dedicated I/O workers could isolate completion processing from application execution, but introduce additional synchronization, communication overhead, and potentially idle CPU capacity.
+
+We aim to compare these architectures and investigate how the allocation of CPU resources between computation and I/O processing affects throughput, utilization, and tail latency. We will also consider whether separate I/O admission limits are necessary to prevent background compaction from saturating storage resources needed by foreground requests.

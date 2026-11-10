@@ -1,0 +1,41 @@
+---
+import { getCollection, render } from "astro:content";
+
+const entries = await getCollection("career");
+const events = await Promise.all(
+  entries
+    .sort((left, right) => right.data.order - left.data.order)
+    .map(async (entry) => ({
+      id: entry.id,
+      event: entry.data,
+      Content: (await render(entry)).Content,
+    })),
+);
+---
+
+<ol class="flex flex-col list-none">
+  {events.map(({ id, event, Content }, index) => (
+    <li>
+      <article class="grid grid-cols-1 gap-x-8 sm:grid-cols-6" aria-labelledby={`career-${id}`}>
+        <div class:list={[
+          "flex flex-col p-5 sm:col-span-2",
+          index % 2 === 0 && "border-l rounded-l border-y",
+        ]}>
+          <h3 id={`career-${id}`} class="font-semibold text-rose-500 dark:text-rose-400">
+            {event.org}
+          </h3>
+          <p class="text-sm">{event.position}</p>
+          <p class="text-gray-600 dark:text-gray-300 text-xs">{event.time}</p>
+          <p class="text-gray-600 dark:text-gray-300 text-xs">{event.loc}</p>
+        </div>
+        <div class:list={[
+          "timeline-description block p-5 content-center sm:col-span-4",
+          index % 2 !== 0 && "border-r rounded-r border-y",
+          index === 0 && "border-t",
+        ]}>
+          <Content />
+        </div>
+      </article>
+    </li>
+  ))}
+</ol>

@@ -1,19 +1,39 @@
 ---
 import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
+import type { MarkdownHeading } from "astro";
+import BlogToc from "../components/BlogToc.astro";
 import FormattedDate from "../components/FormattedDate.astro";
 import MainLayout from "./MainLayout.astro";
 
-type Props = CollectionEntry<"blog">["data"];
+type Props = CollectionEntry<"blog">["data"] & {
+  headings?: MarkdownHeading[];
+};
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+const {
+  title,
+  description,
+  pubDate,
+  updatedDate,
+  heroImage,
+  headings = [],
+} = Astro.props;
+const sections = headings.filter((heading) => heading.depth === 2);
 ---
 
 <MainLayout title={title} description={description}>
 	<link slot="head" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.0/dist/katex.min.css">
 
-	<main class="container flex flex-col gap-y-8 pb-8 pt-6 md:pb-12 md:pt-10">
-		<article class="mx-auto w-full max-w-3xl">
+	<div class="blog-shell">
+		{sections.length > 0 && (
+			<aside class="blog-sidebar">
+				<nav class="blog-contents" aria-label="Table of contents">
+					<p class="blog-contents-title">On this page</p>
+					<BlogToc headings={headings} />
+				</nav>
+			</aside>
+		)}
+		<article class="blog-article">
 			{heroImage && (
 				<div class="mb-8">
 					<Image
@@ -26,9 +46,8 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 				</div>
 			)}
 
-			<div class="mb-8 text-center">
-				<h1 class="mb-4 text-4xl font-bold">{title}</h1>
-				<div class="text-sm text-muted-foreground">
+			<header class="blog-header">
+				<div class="blog-date">
 					<FormattedDate date={pubDate} />
 					{updatedDate && (
 						<div class="mt-1 italic">
@@ -36,12 +55,22 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 						</div>
 					)}
 				</div>
-				<hr class="mt-6" />
-			</div>
+				<h1>{title}</h1>
+				<p class="blog-description">{description}</p>
+			</header>
 
-			<div class="prose">
+			{sections.length > 0 && (
+				<nav class="blog-contents blog-contents-inline" aria-label="Table of contents">
+					<details>
+						<summary>On this page</summary>
+						<BlogToc headings={headings} />
+					</details>
+				</nav>
+			)}
+
+			<div class="prose blog-prose">
 				<slot />
 			</div>
 		</article>
-	</main>
+	</div>
 </MainLayout>

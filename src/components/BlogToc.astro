@@ -1,0 +1,71 @@
+---
+import type { MarkdownHeading } from "astro";
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+const sections: { heading: MarkdownHeading; children: MarkdownHeading[] }[] =
+  [];
+for (const heading of headings) {
+  if (heading.depth === 2) {
+    sections.push({ heading, children: [] });
+  } else if (heading.depth === 3) {
+    sections.at(-1)?.children.push(heading);
+  }
+}
+---
+
+<ol data-blog-toc>
+  {sections.map(({ heading, children }) => (
+    <li>
+      <a href={`#${heading.slug}`}>{heading.text}</a>
+      {children.length > 0 && (
+        <ol>
+          {children.map((child) => (
+            <li><a href={`#${child.slug}`}>{child.text}</a></li>
+          ))}
+        </ol>
+      )}
+    </li>
+  ))}
+</ol>
+
+<script>
+  // Native anchor navigation remains available without this enhancement.
+  const links = [
+    ...document.querySelectorAll<HTMLAnchorElement>("[data-blog-toc] a"),
+  ];
+  const headings = [
+    ...document.querySelectorAll<HTMLElement>(".blog-prose :is(h2, h3)[id]"),
+  ];
+  let scheduled = false;
+
+  function updateCurrentSection() {
+    let current = headings[0]?.id;
+    for (const heading of headings) {
+      if (heading.getBoundingClientRect().top > 120) break;
+      current = heading.id;
+    }
+    for (const link of links) {
+      if (decodeURIComponent(link.hash.slice(1)) === current) {
+        link.setAttribute("aria-current", "location");
+      } else {
+        link.removeAttribute("aria-current");
+      }
+    }
+    scheduled = false;
+  }
+
+  function scheduleUpdate() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(updateCurrentSection);
+  }
+
+  document.addEventListener("scroll", scheduleUpdate, { passive: true });
+  window.addEventListener("resize", scheduleUpdate);
+  window.addEventListener("hashchange", scheduleUpdate);
+  updateCurrentSection();
+</script>

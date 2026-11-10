@@ -13,6 +13,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# local agent task logs and runtime artifacts
+.pi/
+
 # environment variables
 .env
 .env.production

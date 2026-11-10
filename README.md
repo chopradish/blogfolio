@@ -40,6 +40,18 @@ The `src/content/` directory contains "collections" of related Markdown and MDX 
 
 Any static assets, like images, can be placed in the `public/` directory.
 
+## Editing the homepage timeline
+
+The “What am I up to?” entries live in `src/content/career/*.mdx`.
+Each file contains `order`, `org`, `position`, `time`, and `loc` frontmatter.
+Higher `order` values appear first; keep these values unique.
+
+The MDX body is the description. Use Markdown lists, emphasis, inline code,
+and links such as `[https://github.com/cmu-db/optd](https://github.com/cmu-db/optd)`.
+MDX also supports importing Astro components for custom presentation.
+Entries are validated by the `career` collection in `src/content.config.ts`
+and rendered statically by `src/components/Timeline.astro`, without client hydration.
+
 ## 🧞 Commands
 
 All commands are run from the root of the project, from a terminal:

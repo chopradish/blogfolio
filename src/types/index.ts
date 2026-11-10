@@ -29,15 +29,6 @@ export type Project = {
   ext?: string;
 };
 
-export type CareerEvent = {
-  id: number;
-  time: string;
-  loc: string;
-  position: string;
-  org: string;
-  details: string[];
-};
-
 export type SiteConfig = {
   name: string;
   description: string;
