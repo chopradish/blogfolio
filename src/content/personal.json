@@ -2,16 +2,16 @@
   "site": {
     "name": "Aditya Chopra • chopradish",
     "description": "Personal website and blog for Aditya Chopra",
-    "url": "https://chopradish.pages.dev",
+    "url": "https://chopradi.sh",
     "links": {
-      "twitter": "https://twitter.com/adeecc11",
+      "twitter": "https://twitter.com/chopradish",
       "repository": "https://github.com/chopradish/blogfolio"
     }
   },
   "profile": {
     "name": "Aditya Chopra",
-    "headline": "CS Grad Student @ CMU | prev @ D.E. Shaw, Nutanix",
-    "intro": "Pursuing a career in design, databases and distributed systems ✨",
+    "headline": "CS Grad Student @ CMU | prev @ Databricks, D.E. Shaw, Nutanix",
+    "intro": "Pursuing a career in database, compilers and distributed storage systems ✨",
     "image": "/images/mugshot.png",
     "imageAlt": "profile picture"
   },
@@ -37,12 +37,12 @@
       {
         "title": "LinkedIn",
         "icon": "linkedIn",
-        "href": "https://www.linkedin.com/in/aditya-chopra11/"
+        "href": "https://www.linkedin.com/in/adichopra11/"
       },
       {
         "title": "Twitter",
         "icon": "twitter",
-        "href": "https://twitter.com/adeecc11"
+        "href": "https://twitter.com/chopradish"
       }
     ]
   },
@@ -109,12 +109,35 @@
     },
     {
       "id": 6,
+      "time": "May 2026 - Aug 2026",
+      "loc": "Sunnyvale, California",
+      "position": "SWE Intern",
+      "org": "Databricks (Reyden)",
+      "details": [
+        "Built the fault-tolerance story from ground up for the new native analytical query engine.",
+        "Impemented locality-aware adaptive shuffle data partitioning and coalescing for shuffle and broadcast operators",
+        "Reduced concurrent configuration GET/PUT perf by optimizing the data structures (multi-versioned, zero-copy)."
+      ]
+    },
+    {
+      "id": 7,
       "time": "Jan 2026 - Present",
       "loc": "Pittsburgh, Pennsylvania",
       "position": "Member",
       "org": "CMU Database Group",
       "details": [
-        "Working on cardinality and cost-estimation for an experimental query optimizer."
+        "Working on cardinality and cost-estimation for an experimental query optimizer.",
+        "https://github.com/cmu-db/optd"
+      ]
+    },
+    {
+      "id": 8,
+      "time": "Feb 2027 - ???",
+      "loc": "Menlo Park, California",
+      "position": "SWE-II",
+      "org": "Snowflake (Unistore Storage)",
+      "details": [
+        "Coming soon..."
       ]
     }
   ],
