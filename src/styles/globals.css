@@ -89,9 +89,6 @@ body {
 }
 
 .home-section-heading {
-  position: sticky;
-  top: 0;
-  z-index: 10;
   padding-block: 0.75rem;
   background: white;
 }
@@ -100,13 +97,23 @@ body {
   background: var(--color-gray-950);
 }
 
-/* Keep focused links below even a wrapped sticky heading on small screens. */
+/* Mobile headings scroll normally; desktop headings remain sticky. */
 :is(#recent-posts, #timeline, #featured-projects) :is(a, button) {
-  scroll-margin-block: 10rem 2rem;
+  scroll-margin-block: 2rem;
 }
 
 /* Borrow the outer gutter; the timeline retains its original width and x-position. */
 @media (min-width: 64rem) {
+  .home-section-heading {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  :is(#recent-posts, #timeline, #featured-projects) :is(a, button) {
+    scroll-margin-block: 10rem 2rem;
+  }
+
   .career-layout:has(.career-filters:not([hidden])) {
     display: grid;
     grid-template-columns: 2.75rem minmax(0, 1fr);
