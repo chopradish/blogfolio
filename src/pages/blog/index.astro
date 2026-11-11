@@ -1,7 +1,6 @@
 ---
-import { Image } from "astro:assets";
 import { getCollection } from "astro:content";
-import FormattedDate from "../../components/FormattedDate.astro";
+import BlogCard from "../../components/BlogCard.astro";
 import personal from "../../content/personal.json";
 import MainLayout from "../../layouts/MainLayout.astro";
 
@@ -10,38 +9,13 @@ const posts = (await getCollection("blog")).sort(
 );
 ---
 
-<MainLayout
-  title={personal.site.name}
-  description={personal.site.description}
->
-	<main class="container flex flex-col gap-y-8 pb-8 pt-6 md:pb-12 md:pt-10">
-		<section>
-			<h1 class="mb-8 text-4xl font-bold">Blog</h1>
-			<div class="blog-card-grid">
-				{posts.map((post) => (
-					<article class="blog-card">
-						<a href={`/blog/${post.id}/`} class="blog-card-link">
-							<div class="blog-card-media">
-								{post.data.heroImage && (
-									<Image
-										width={720}
-										height={405}
-										src={post.data.heroImage}
-										fit="contain"
-										alt=""
-									/>
-								)}
-							</div>
-							<h2 class="blog-card-title">
-								{post.data.title}
-							</h2>
-							<p class="blog-card-date">
-								<FormattedDate date={post.data.pubDate} />
-							</p>
-						</a>
-					</article>
-				))}
-			</div>
-		</section>
-	</main>
+<MainLayout title={personal.site.name} description={personal.site.description}>
+  <div class="container flex flex-col gap-y-8 pb-8 pt-6 md:pb-12 md:pt-10">
+    <section aria-labelledby="blog-heading">
+      <h1 id="blog-heading" class="mb-8 text-4xl font-bold">Blog</h1>
+      <div class="blog-card-grid">
+        {posts.map((post) => <BlogCard post={post} />)}
+      </div>
+    </section>
+  </div>
 </MainLayout>

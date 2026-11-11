@@ -1,32 +1,15 @@
 ---
-import { Image } from "astro:assets";
 import { getCollection } from "astro:content";
-import FormattedDate from "./FormattedDate.astro";
+import BlogCard from "./BlogCard.astro";
 
 const posts = (await getCollection("blog"))
-  .sort((left, right) => right.data.pubDate.valueOf() - left.data.pubDate.valueOf())
+  .sort(
+    (left, right) => right.data.pubDate.valueOf() - left.data.pubDate.valueOf(),
+  )
   .slice(0, 3);
 ---
 
 <div class="blog-card-grid">
-  {posts.map((post) => (
-    <article class="blog-card">
-      <a href={`/blog/${post.id}/`} class="blog-card-link">
-        <div class="blog-card-media">
-          {post.data.heroImage && (
-            <Image
-              width={720}
-              height={405}
-              src={post.data.heroImage}
-              fit="contain"
-              alt=""
-            />
-          )}
-        </div>
-        <h3 class="blog-card-title">{post.data.title}</h3>
-        <p class="blog-card-date"><FormattedDate date={post.data.pubDate} /></p>
-      </a>
-    </article>
-  ))}
+  {posts.map((post) => <BlogCard post={post} headingLevel="h3" />)}
 </div>
 <a href="/blog" class="section-link mt-6">See more <span aria-hidden="true">→</span><span class="sr-only"> posts</span></a>

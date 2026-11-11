@@ -4,7 +4,6 @@ import type { CollectionEntry } from "astro:content";
 import type { MarkdownHeading } from "astro";
 import BlogToc from "../components/BlogToc.astro";
 import FormattedDate from "../components/FormattedDate.astro";
-import { getContainedImageAspectRatio } from "../lib/images";
 import MainLayout from "./MainLayout.astro";
 import "katex/dist/katex.min.css";
 
@@ -37,13 +36,13 @@ const sections = headings.filter((heading) => heading.depth === 2);
 			{heroImage && (
 				<div class="mb-8">
 					<Image
-						width={1020}
-						height={510}
 						src={heroImage}
-						fit="contain"
-						style={{ aspectRatio: getContainedImageAspectRatio(heroImage, 1020, 510) }}
+						widths={[480, 720, 1020, 1664]}
+						sizes="(min-width: 2000px) 832px, (min-width: 1200px) 704px, (min-width: 832px) 784px, calc(100vw - 3rem)"
+						loading="eager"
+						fetchpriority="high"
+						class="block h-auto w-full rounded-lg"
 						alt=""
-						class="rounded-lg"
 					/>
 				</div>
 			)}

@@ -8,6 +8,14 @@
     system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
     Ubuntu, Cantarell, sans-serif;
 
+  /* Shared accessible colors */
+  --color-accent: var(--color-rose-700);
+  --color-accent-foreground: white;
+  --color-foreground: var(--color-zinc-950);
+  --color-muted: var(--color-zinc-100);
+  --color-muted-foreground: var(--color-zinc-600);
+  --color-border: var(--color-zinc-300);
+
   /* Border radius */
   --radius-lg: 0.5rem;
   --radius-md: calc(0.5rem - 2px);
@@ -16,6 +24,50 @@
 
 html {
   font-family: var(--font-family-sans);
+  background: white;
+}
+
+html.dark {
+  --color-accent: var(--color-rose-300);
+  --color-accent-foreground: var(--color-zinc-950);
+  --color-foreground: var(--color-zinc-100);
+  --color-muted: var(--color-zinc-900);
+  --color-muted-foreground: var(--color-zinc-400);
+  --color-border: var(--color-zinc-700);
+  background: var(--color-gray-950);
+}
+
+:where(a, button, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+.skip-link {
+  position: fixed;
+  top: calc(0.5rem + env(safe-area-inset-top, 0px));
+  left: max(0.5rem, env(safe-area-inset-left, 0px));
+  z-index: 100;
+  padding: 0.75rem 1rem;
+  background: var(--color-foreground);
+  color: var(--color-muted);
+  transform: translateY(calc(-100% - env(safe-area-inset-top, 0px) - 1rem));
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+/* viewport-fit=cover opts out of Safari's automatic page insets. */
+.site-frame {
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+
+.mobile-nav-panel {
+  top: calc(5rem + env(safe-area-inset-top, 0px));
+  padding-left: max(1rem, env(safe-area-inset-left, 0px));
+  padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
 }
 
 body {
@@ -25,7 +77,7 @@ body {
 }
 
 * {
-  border-color: var(--border);
+  border-color: var(--color-border);
 }
 
 @utility container {
@@ -57,7 +109,7 @@ body {
   border: 1px solid var(--color-zinc-950);
   border-radius: 0;
   background: white;
-  color: var(--color-rose-500);
+  color: var(--color-accent);
   cursor: pointer;
 }
 
@@ -68,14 +120,14 @@ body {
 .career-filter[aria-pressed="true"] {
   border-color: transparent;
   background: var(--color-zinc-950);
-  color: var(--color-rose-500);
+  color: var(--color-rose-300);
   font-weight: 600;
 }
 
 .dark .career-filter {
   border-color: var(--color-zinc-100);
   background: var(--color-gray-950);
-  color: var(--color-rose-500);
+  color: var(--color-rose-300);
 }
 
 .dark .career-filter:hover {
@@ -85,10 +137,17 @@ body {
 .dark .career-filter[aria-pressed="true"] {
   border-color: transparent;
   background: white;
-  color: var(--color-rose-500);
+  color: var(--color-rose-700);
+}
+
+.home-sections {
+  row-gap: 4.5rem;
 }
 
 .home-section-heading {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   padding-block: 0.75rem;
   background: white;
 }
@@ -97,23 +156,28 @@ body {
   background: var(--color-gray-950);
 }
 
-/* Mobile headings scroll normally; desktop headings remain sticky. */
+/* The heading's own opaque box covers the safe area, not a pseudo-element.
+   Reduce the section gap by the added padding, keeping normal-flow spacing. */
+@media (width < 64rem) {
+  .home-sections {
+    row-gap: max(0px, calc(4.5rem - env(safe-area-inset-top, 0px)));
+  }
+
+  .home-section-heading {
+    padding-top: calc(0.75rem + env(safe-area-inset-top, 0px));
+    margin-left: calc(-2rem - env(safe-area-inset-left, 0px));
+    margin-right: calc(-2rem - env(safe-area-inset-right, 0px));
+    padding-left: calc(2rem + env(safe-area-inset-left, 0px));
+    padding-right: calc(2rem + env(safe-area-inset-right, 0px));
+  }
+}
+
 :is(#recent-posts, #timeline, #featured-projects) :is(a, button) {
-  scroll-margin-block: 2rem;
+  scroll-margin-block: calc(10rem + env(safe-area-inset-top, 0px)) 2rem;
 }
 
 /* Borrow the outer gutter; the timeline retains its original width and x-position. */
 @media (min-width: 64rem) {
-  .home-section-heading {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-
-  :is(#recent-posts, #timeline, #featured-projects) :is(a, button) {
-    scroll-margin-block: 10rem 2rem;
-  }
-
   .career-layout:has(.career-filters:not([hidden])) {
     display: grid;
     grid-template-columns: 2.75rem minmax(0, 1fr);
@@ -262,13 +326,13 @@ body {
 }
 
 .prose a {
-  color: var(--color-rose-400);
+  color: var(--color-accent);
   text-decoration: underline;
-  text-decoration-color: var(--color-rose-400);
+  text-decoration-color: currentColor;
 }
 
 .prose a:hover {
-  color: var(--color-rose-200);
+  text-decoration-thickness: 2px;
 }
 
 .prose h1,
@@ -277,7 +341,7 @@ body {
 .prose h4,
 .prose h5,
 .prose h6 {
-  color: var(--foreground);
+  color: var(--color-foreground);
   font-weight: 600;
   margin-top: 1.5em;
   margin-bottom: 0.5em;
@@ -303,14 +367,14 @@ body {
 }
 
 .prose code {
-  background-color: var(--muted);
+  background-color: var(--color-muted);
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
   font-size: 0.875em;
 }
 
 .prose pre {
-  background-color: var(--muted);
+  background-color: var(--color-muted);
   padding: 1rem;
   border-radius: 0.5rem;
   overflow-x: auto;
@@ -328,15 +392,25 @@ body {
   padding-left: 1.5em;
 }
 
+/* Tailwind Preflight removes native markers; restore them only in prose. */
+.prose ul {
+  list-style-type: disc;
+}
+
+.prose ol {
+  list-style-type: decimal;
+}
+
 .prose li {
   margin-bottom: 0.5em;
+  line-height: 1.75;
 }
 
 .prose blockquote {
   border-left: 4px solid var(--color-rose-400);
   padding-left: 1rem;
   font-style: italic;
-  color: var(--muted-foreground);
+  color: var(--color-muted-foreground);
   margin: 1.5em 0;
 }
 
@@ -353,18 +427,18 @@ body {
 
 .prose th,
 .prose td {
-  border: 1px solid var(--border);
+  border: 1px solid var(--color-border);
   padding: 0.5rem;
 }
 
 .prose th {
-  background-color: var(--muted);
+  background-color: var(--color-muted);
   font-weight: 600;
 }
 
 .prose hr {
   border: none;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--color-border);
   margin: 2em 0;
 }
 
@@ -486,7 +560,7 @@ body {
   text-underline-offset: 0.2em;
 }
 
-.dark .timeline-description a {
+:where(.dark) .timeline-description a {
   color: var(--color-rose-300);
 }
 
@@ -506,7 +580,7 @@ body {
   font-size: 0.875em;
 }
 
-.dark .timeline-description :not(pre) > code {
+:where(.dark) .timeline-description :not(pre) > code {
   background: var(--color-zinc-900);
 }
 

@@ -10,6 +10,8 @@ This is Aditya Chopra’s personal technical site. Its priorities, in order, are
 
 The homepage, experience, and projects should help recruiters quickly understand the work and its impact. Blog pages should serve readers who expect technical depth. The site may eventually include a small number of personal posts about experiences at CMU or Databricks, but it is otherwise technical.
 
+This codebase is yours: what it's for and how it's built are your call, and you'll keep building on it.
+
 ## Non-negotiable editorial boundaries
 
 - **Do not write, rewrite, paraphrase, summarize, retitle, or otherwise alter prose** in blog posts, biography copy, project descriptions, career history, or other authored content. Agents work on design and implementation only.
@@ -41,13 +43,13 @@ Accessibility is a feature, not a later polish pass. For every UI change:
 
 ## Architecture and implementation
 
-- This is an Astro 5 static site, deployed to Cloudflare Pages. Use Astro by default.
+- This is an Astro 7 static site, deployed to Cloudflare Pages. Use Astro by default.
 - Use React only for genuinely interactive, client-side behavior. Avoid hydration for static presentation; every `client:*` directive must have a user-facing justification.
 - Prefer server/static rendering, native browser capabilities, and CSS before client JavaScript.
 - All site data lives in `src/content/`. Personal information, navigation, and featured projects are in `src/content/personal.json`; career timeline entries are MDX files in `src/content/career/`, and blog posts are Markdown/MDX files in `src/content/blog/`. Collection schemas remain in `src/content.config.ts`.
 - Treat changes to public links, career history, project copy, post prose, and post frontmatter as editorial changes requiring explicit approval.
 - Global styles live in `src/styles/globals.css`. Follow existing Tailwind v4 conventions and use the configured theme rather than introducing ad-hoc global styling.
-- Math rendering uses `remark-math` and `rehype-katex`; preserve it when changing blog presentation.
+- Markdown/MDX uses Sätteri. Math is pre-rendered by `src/lib/markdown-math.ts` with KaTeX; preserve its accessible HTML/MathML output and KaTeX styles when changing blog presentation.
 - Use TypeScript and keep component boundaries small and purposeful. Prefer an accessible native HTML control over an icon-only custom control.
 - New dependencies are permitted only when they provide a necessary, non-trivial capability that cannot be reasonably implemented with the existing stack. Before adding one, explain its bundle, privacy, maintenance, and accessibility impact and obtain approval when the choice is not clearly necessary.
 
@@ -67,8 +69,8 @@ When an improvement touches a protected area, propose it with the user impact, r
 
 For implementation changes:
 
-1. Run formatting/lint checks appropriate to the changed files (Biome is configured in `biome.json`).
-2. Run `pnpm build` before declaring the work complete.
+1. Run `pnpm check` for Biome, Astro-aware type/template checks, focused unit tests, and the production build. Biome's unused-symbol rules for `.astro` files are delegated to Astro's checker.
+2. Keep validation local. Do not add CI or layout/output-parity test suites unless explicitly requested.
 3. Check the affected UI at relevant mobile and desktop widths, in light and dark themes, and by keyboard when applicable.
 4. Human visual verification and sign-off are required before the change is considered accepted. Agents can report what needs review but cannot claim that sign-off.
 

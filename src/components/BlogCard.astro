@@ -1,0 +1,34 @@
+---
+import { Image } from "astro:assets";
+import type { CollectionEntry } from "astro:content";
+import FormattedDate from "./FormattedDate.astro";
+
+interface Props {
+  post: CollectionEntry<"blog">;
+  headingLevel?: "h2" | "h3";
+}
+
+const { post, headingLevel: Heading = "h2" } = Astro.props;
+---
+
+<article class="blog-card">
+  <a href={`/blog/${post.id}/`} class="blog-card-link">
+    <div class="blog-card-media">
+      {post.data.heroImage && (
+        <Image
+          width={720}
+          height={405}
+          widths={[240, 360, 480, 720, 1024]}
+          sizes="(min-width: 2000px) 300px, (min-width: 1024px) 214px, (min-width: 768px) 336px, (min-width: 640px) calc((100vw - 6rem) / 2), calc(100vw - 4rem)"
+          src={post.data.heroImage}
+          fit="contain"
+          loading="lazy"
+          decoding="async"
+          alt=""
+        />
+      )}
+    </div>
+    <Heading class="blog-card-title">{post.data.title}</Heading>
+    <p class="blog-card-date"><FormattedDate date={post.data.pubDate} /></p>
+  </a>
+</article>

@@ -1,73 +1,74 @@
-# Astro Starter Kit: Blog
+# Blogfolio
 
-```sh
-pnpm create astro@latest -- --template blog
-```
+A static personal site and technical blog built with Astro 7, Tailwind CSS 4,
+and Markdown/MDX. Pages are generated at build time for Cloudflare Pages;
+static presentation does not require client hydration.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Requirements
 
-Features:
+- Node.js 22.23.4 or newer
+- pnpm
 
-- ✅ Minimal styling (make it your own!)
-- ✅ 100/100 Lighthouse performance
-- ✅ SEO-friendly with canonical URLs and OpenGraph data
-- ✅ Sitemap support
-- ✅ RSS Feed support
-- ✅ Markdown & MDX support
+Install dependencies with `pnpm install`.
 
-## 🚀 Project Structure
+## Local commands
 
-Inside of your Astro project, you'll see the following folders and files:
+| Command               | Purpose                                                      |
+| --------------------- | ------------------------------------------------------------ |
+| `pnpm dev`            | Start the Astro development server                           |
+| `pnpm astro dev stop` | Stop the development server                                  |
+| `pnpm preview`        | Preview the production build                                 |
+| `pnpm lint`           | Run Biome checks                                             |
+| `pnpm typecheck`      | Check Astro templates and TypeScript                         |
+| `pnpm test`           | Run focused unit tests                                       |
+| `pnpm build`          | Generate the static site in `dist/`                          |
+| `pnpm check`          | Run lint, Astro checks, unit tests, and the production build |
 
-```text
-├── public/
-├── src/
-│   ├── components/
-│   ├── content/
-│   ├── layouts/
-│   └── pages/
-├── astro.config.mjs
-├── README.md
-├── package.json
-└── tsconfig.json
-```
+Astro may keep its development server running after the start command returns.
+Use the stop command when finished.
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+Validation is local. There is no CI or layout/output-parity test suite.
+Biome checks supported script/style files; its unused-symbol rules are disabled
+for `.astro` files because they do not account for template references.
+Astro's checker handles template-aware unused-symbol and type checks instead.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## Content and implementation
 
-The `src/content/` directory contains "collections" of related Markdown and MDX documents. Use `getCollection()` to retrieve posts from `src/content/blog/`, and type-check your frontmatter using an optional schema. See [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/) to learn more.
+- `src/content/personal.json`: profile data, navigation, and featured projects.
+- `src/content/career/*.mdx`: career entries, rendered on the homepage and resume.
+- `src/content/blog/*.{md,mdx}`: authored posts and frontmatter.
+- `src/content.config.ts`: content schemas.
+- `src/components/BlogCard.astro`: shared homepage/blog-index cards.
+- `src/components/ThemePortrait.astro`: responsive, theme-aware portrait with a
+  no-JavaScript fallback. Only the active theme's image is requested initially.
+- `src/styles/globals.css`: global styles and theme tokens.
 
-Any static assets, like images, can be placed in the `public/` directory.
+Career frontmatter includes `order`, `org`, `position`, `time`, `loc`, and `tags`.
+Entries sort by descending `order`. Category tags are `databases`, `systems`,
+`ML`, and `misc`; the hidden `featured` tag selects the homepage's default set.
+The resume includes every entry.
 
-## Editing the homepage timeline
+## Markdown and images
 
-The “What am I up to?” entries live in `src/content/career/*.mdx`.
-Each file contains `order`, `org`, `position`, `time`, and `loc` frontmatter.
-Higher `order` values appear first; keep these values unique.
+Sätteri compiles Markdown and MDX at build time. `src/lib/markdown-math.ts`
+pre-renders KaTeX HTML and accessible MathML; the existing KaTeX stylesheet
+provides presentation. Existing KaTeX display-line-break syntax is explicitly
+supported; other compatibility warnings remain enabled and invalid TeX is
+rendered visibly. Typography uses Sätteri’s native defaults. The math adapter
+does not add a client-side renderer.
 
-The MDX body is the description. Use Markdown lists, emphasis, inline code,
-and links such as `[https://github.com/cmu-db/optd](https://github.com/cmu-db/optd)`.
-MDX also supports importing Astro components for custom presentation.
-Entries are validated by the `career` collection in `src/content.config.ts`
-and rendered statically by `src/components/Timeline.astro`, without client hydration.
+Astro generates responsive image variants. Keep `sizes` in sync with the CSS
+column widths when changing card, portrait, or article layouts. Blog diagrams
+retain their full-size links and authored alternative text.
 
-## 🧞 Commands
+## Accessibility and review
 
-All commands are run from the root of the project, from a terminal:
+Preserve keyboard focus indicators, the skip link, semantic heading levels,
+landmarks, contrast in both themes, and reduced-motion behavior. Changes to
+notch/safe-area handling still require real iPhone Safari verification.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+See `AGENTS.md` for editorial boundaries and implementation guidance. Authored
+post, biography, project, and career copy must not be rewritten by agents.
 
 ## Credit
 

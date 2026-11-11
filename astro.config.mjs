@@ -1,12 +1,11 @@
 // @ts-check
 
-import { unified } from "@astrojs/markdown-remark";
+import { satteri } from "@astrojs/markdown-satteri";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
-import rehypeKatex from "rehype-katex";
-import remarkMath from "remark-math";
+import { satteriMath } from "./src/lib/markdown-math.ts";
 
 // https://astro.build/config
 export default defineConfig({
@@ -16,12 +15,14 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
-  // Preserve Astro 5 whitespace and the existing math/MDX pipeline.
+  // Keep output compact; math and MDX are compiled entirely at build time.
   compressHTML: true,
   markdown: {
-    processor: unified({
-      remarkPlugins: [remarkMath],
-      rehypePlugins: [rehypeKatex],
+    // These authored fence labels intentionally retain plaintext rendering.
+    shikiConfig: { langAlias: { ":SARSA": "text", ":Q-Learning": "text" } },
+    processor: satteri({
+      features: { math: true },
+      hastPlugins: [satteriMath],
     }),
   },
 

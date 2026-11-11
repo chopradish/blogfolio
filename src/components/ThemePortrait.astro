@@ -1,0 +1,73 @@
+---
+import { getImage, Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
+interface Props {
+  light: ImageMetadata;
+  dark: ImageMetadata;
+  alt: string;
+}
+
+const { light, dark, alt } = Astro.props;
+const sizes =
+  "(min-width: 1024px) 384px, (min-width: 640px) 256px, (min-width: 448px) 384px, calc(100vw - 4rem)";
+const options = {
+  width: 384,
+  height: 384,
+  widths: [256, 384, 512, 768],
+  sizes,
+  fit: "cover" as const,
+  format: "webp" as const,
+};
+const [lightImage, darkImage] = await Promise.all([
+  getImage({ src: light, ...options }),
+  getImage({ src: dark, ...options }),
+]);
+---
+
+<!-- Set only the active theme's source, before the browser starts its request. -->
+<img
+  hidden
+  data-theme-portrait
+  data-light-src={lightImage.src}
+  data-light-srcset={lightImage.srcSet.attribute}
+  data-dark-src={darkImage.src}
+  data-dark-srcset={darkImage.srcSet.attribute}
+  sizes={sizes}
+  width={384}
+  height={384}
+  alt={alt}
+  loading="eager"
+  fetchpriority="high"
+  decoding="async"
+  class="aspect-square h-auto w-full rounded-full object-cover"
+/>
+<script is:inline>
+  (() => {
+    const portrait = document.currentScript?.previousElementSibling;
+    if (!(portrait instanceof HTMLImageElement)) return;
+    const updatePortrait = () => {
+      const theme = document.documentElement.classList.contains("dark") ? "dark" : "light";
+      if (portrait.dataset.theme === theme) return;
+      portrait.dataset.theme = theme;
+      portrait.srcset = portrait.dataset[`${theme}Srcset`] || "";
+      portrait.src = portrait.dataset[`${theme}Src`] || "";
+      portrait.hidden = false;
+    };
+    updatePortrait();
+    new MutationObserver(updatePortrait).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  })();
+</script>
+<noscript>
+  <Image
+    src={light}
+    {...options}
+    alt={alt}
+    loading="eager"
+    fetchpriority="high"
+    class="aspect-square h-auto w-full rounded-full object-cover"
+  />
+</noscript>

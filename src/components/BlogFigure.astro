@@ -12,7 +12,14 @@ const { src, alt } = Astro.props;
 
 <figure class="blog-figure">
   <a class="blog-figure-image" href={src.src} aria-label={`Open full-size diagram: ${alt}`}>
-    <Image src={src} alt={alt} widths={[768, 1440, 2400]} sizes="(max-width: 832px) calc(100vw - 5rem), 752px" />
+    <Image
+      src={src}
+      alt={alt}
+      widths={[480, 768, 1440, 2400]}
+      sizes="(min-width: 2000px) 798px, (min-width: 1200px) 670px, (min-width: 832px) 750px, calc(100vw - 82px)"
+      loading="lazy"
+      decoding="async"
+    />
     <span class="blog-figure-action" aria-hidden="true">Open full size ↗</span>
   </a>
   <figcaption><slot /></figcaption>

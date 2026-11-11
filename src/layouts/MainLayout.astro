@@ -53,13 +53,14 @@ const currentPath = Astro.url.pathname;
     </script>
   </head>
   <body class="min-h-screen bg-white dark:bg-gray-950 text-black dark:text-white antialiased">
-    <div class="flex min-h-screen flex-col">
+    <div class="site-frame flex min-h-screen flex-col">
+      <a href="#main-content" class="skip-link">Skip to content</a>
       <header class="container z-40 bg-background">
         <div class="flex h-20 items-center align-middle justify-between py-6">
           <SiteNav items={personal.navigation.main} />
         </div>
       </header>
-      <main class="flex-1">
+      <main id="main-content" tabindex="-1" class="flex-1">
         <slot />
       </main>
       <SiteFooter currentPath={currentPath} />
